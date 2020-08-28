@@ -1,49 +1,29 @@
-/** Exersie 2 */
-const express=require('express')
-const app=express()
-const bodyParser=require('body-parser')
-const cockieParser=require('cookie-parser')
-const jwt=require('jsonwebtoken')
-const jwtKey="my_secret_key"
-const jwtExpirySeconds=300
+const express = require('express');
+const bodyParser = require('body-parser');
+// const cookieParser = require('cookie-parser');
+const mongoose = require('mongoose');
+const app = express();
+const verifyToken=require('./routes/verifyToken')
+const userRouters=require('./routes/users'); //import routers
+const authRouters=require('./routes/auth');
+require('dotenv/config')
+// Connect To DB
+mongoose.connect(process.env.DB_CONNECTION, { 
+    useNewUrlParser: true ,
+    useUnifiedTopology: true }, () => {
+    console.log(`Successfully connected to DB!`)
+})
+// Middleware
 
-// middleware
-app.use(bodyParser.json())
-app.use(cockieParser());
-// routers
-app.post('/login',(req,res)=>{
-    const {username,password}=req.body;
-    console.log(req.body);
-    if(username=='admin'&& password=='12345678'){
-        const token=jwt.sign({username},jwtKey,{
-            algorithm:"HS256",
-            expiresIn:jwtExpirySeconds,
-        })
-        console.log(token);
-        res.cookie("token",token,{maxAge:jwtExpirySeconds*10});
-        res.end()
-    }
-    else{
-        // console.log('aaa')
-        res.status(401).end();
-    }
-    // res.send({"message":"loging"});
-})
-app.get('/users',(req,res)=>{
-    res.send({"message":"users get"});
-})
-app.get('/user',(req,res)=>{
-    res.send({"message":"user"});
-})
-app.post('/users/:id',(req,res)=>{
-    res.send({"message":"users post"});
-    console.log(req.params.id);
-})
-app.put('/users',(req,res)=>{
-    res.send({"message":"users put"});
-})
-app.delete('/users/:id',(req,res)=>{
-    res.send({"message":"users delete"});
-    console.log(req.params.id);
-})
-app.listen(3004)
+app.use(bodyParser.json());
+// app.use(cookieParser)
+
+// Token middleware
+// app.all('/^((?!login|refresh).)*$/', verifyToken);
+// Router middleware
+app.use('/users',userRouters) // handle operating on user
+app.use('/',authRouters)
+// start app
+app.listen(process.env.PORT)
+
+
