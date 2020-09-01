@@ -24,6 +24,9 @@ app.use(bodyParser.json());
 app.use('/users',userRouters) // handle operating on user
 app.use('/',authRouters)
 // start app
-app.listen(process.env.PORT)
+const server = app.listen(3011, function(){
+    console.log("API is listening on port xxx");
+});
+module.exports = server;
 
 
